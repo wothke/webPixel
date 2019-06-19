@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<!--
+ webPixel: HTML5 Audio/JavaScript port of PxTone Collage & Organya.
+
+	PxTone Collage & Organya music format & PxTone player impl, written by STUDIO PIXEL http://studiopixel.sakura.ne.jp/
+	Organya player impl written by JTE http://www.echidnatribe.org/
+	
+ 	webPixel Copyright (C) 2019 Juergen Wothke
+
+ Credits: The visualization used on this page was strongly "inspired" by this demo:
+ http://html5-demos.appspot.com/static/webaudio/createMediaSourceElement.html
+-->
+<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+<title>webPixel - the PxTone Collage and Organya music player for the Web</title>
+
+<meta name="description" content="JavaScript player for PxTone Collage and Organya">
+<meta name="author" content="Juergen Wothke">
+<meta name="keywords" content="Web Audio API, HTML5, JavaScript">
+
+<link href="stdlib/font.css" rel="stylesheet" type="text/css">
+<link href="stdlib/common.css" rel="stylesheet" type="text/css">
+<link href="add_on.css" rel="stylesheet" type="text/css">
+
+<link rel="image_src" href="screenshot.gif" />
+<meta property="og:image" content="http://www.wothke.ch/webPixel/screenshot.gif" />
+
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+<link type="image/x-icon" href="favicon.ico" />
+
+<script type="text/javascript" src="stdlib/jquery1.11.min.js"></script>
+<script type="text/javascript" src="stdlib/jquery.details.min.js"></script>
+<script type="text/javascript" src="stdlib/scriptprocessor_player.min.js"></script>
+
+<script>window.openDetails=false;</script>
+<script type="text/javascript" src="stdlib/mini_display.js"></script>
+<script type="text/javascript" src="stdlib/mini_controls.js"></script>
+
+<script type="text/javascript" src="backend_pixel.js"></script>
+<script>
+var playerControls;
+var	songDisplay;
+	
+// configure what music infos to display in SongDisplay
+PixelDisplayAccessor = (function(){ var $this = function (doGetSongInfo) {
+		$this.base.call(this, doGetSongInfo);
+	}; 
+	extend(DisplayAccessor, $this, {
+		getDisplayTitle: function() 	{ return "PxTone+"; },
+		getDisplaySubtitle: function() 	{ return "lets play some music.."; },
+		getDisplayLine1: function() { return this.getSongInfo().title; },
+		getDisplayLine2: function() { return this.getSongInfo().desc; },
+		getDisplayLine3: function() { return ""; }
+	});	return $this; })();
+		
+// link player events to "controls" and "display"
+function doOnTrackEnd(){
+	if (playerControls) playerControls.playNextSong();  
+}
+function doOnTrackReadyToPlay(){ 	
+	ScriptNodePlayer.getInstance().play();
+	songDisplay.redrawSongInfo();
+}
+// depending on the browser/timing the player may be ready before or after (see WASM) init(), i.e.
+// the startup sequence must handle both cases (music can only be started when
+// both the player is ready and init() has been completed..)
+var playerReady= false;		
+function doOnPlayerReady() {
+	playerReady= true;
+	if (playerControls) playerControls.playNextSong(); // playerControls are used to check for init()
+}
+
+function init() {
+	// --------------------------- music player -----------------------
+	var basePath= '';		// not needed here
+	var files = [];	// no need for preload 
+	ScriptNodePlayer.createInstance(new PixelBackendAdapter(), basePath, files, true, doOnPlayerReady,
+										doOnTrackReadyToPlay, doOnTrackEnd);
+		
+	// --------------------------- UI - basic player controls --------------
+	var songs = [
+		// optional: use format "filename;%" where % is number of the track to be played
+		'music/obj0593-1.org',
+		'music/obj0925-1.pttune',
+		
+	];
+	playerControls= new BasicPlayerControls(songs, true, false,
+				(function(someSong) {
+						var arr= someSong.split(";");	
+						var track= arr.length>1?parseInt(arr[1]):0;		
+						var url= arr[0];
+						
+						var options= {};
+						options.track= track;
+
+						return [url, options];
+					})
+				);
+
+	// limit rendering to 50% CPU (fast enough so there is no need ..)
+	songDisplay= new SongDisplay(new PixelDisplayAccessor((function(){return playerControls.getSongInfo();})), 
+								[0x073ada, 0x5d82f9, 0x5d82f9, 0xf0f0f0, 0x5d82f9], 3, 0.5, (function(){playerControls.animate()}));
+
+	if (playerReady) playerControls.playNextSong();	// player was ready before it could trigger the playback
+}
+</script>
+<script type="text/javascript" src="stdlib/analytics.js"></script>
+</head>
+
+<body onload="init();">
+<div class="tooltip" id="tooltip" alt= "This is a hobby project, but it costs not only time to regularily maintain this site but also money to pay for the internet service provider (etc). If you want to keep this site up and running.. or if you just like my work (see https://jwothke.wordpress.com/) and you'd like to see more of it in the future, please make a contribution. Thank you!"></div>
+
+<details>
+  <summary>What's this?</summary>
+  <div>
+  <p>webPixel: JavaScript/HTML5 player for PxTone Collage & Organya music files. Respective formats were created by Daisuke "Pixel" Amaya 
+  for <a target="_blank" href="https://studiopixel.jp/">STUDIO PIXEL</a>.</p>
+ 
+  <p>Bring your own .ptcop, .pttune and .org files by dropping them onto the "STUDIO PIXEL" logo.</p>
+ 
+  <p>2019 by Juergen Wothke  (The source code can be found <a target="_blank" href="https://github.com/wothke/">here</a>.)</p>
+ 
+  <p>This page does not use any plugins but is based exclusively on the WebAudio API. 
+  You'll need a reasonably recent browser to make it play the music.
+  
+  <p>Contrarry to most other HTML5 based pages out there, the music here is NOT based on  
+  OscillatorNode based waveforms or the playback of some sampledata file. Instead the samples here 
+  are completely calculated within JavaScript by running PIXEL's "PxTone Collage" & JTE's "Organya" player logic.</p>  
+ 
+  <p>Please use the below controls to navigate between the songs that you have dropped on the player:
+  <span id="controls"></span>
+ </div>
+</details>
+<aside></aside>
+<section>
+  <div id="logo">
+		<!-- in new Chrome the SHIT reflections disapear dependig on the canvas height.. what a fucking joke -->
+		<div id="moz-reflect-logo"><canvas  id="logoCanvas"  width="270" height="100"></canvas></div>	
+  </div>
+  
+  <div id="spectrum" >
+		<!-- use "hight" greater than 80 and the fucking reflection is gone.. FUCK YOU IDIOTS -->
+		<div id="moz-reflect-spectrum"><canvas id="spectrumCanvas" width="800" height="80"></canvas></div>
+  </div>
+  <div id="drop" class="drop"><img src="studio_pixel.png" width=200 height=200/></div><!--see BasicPlayerControls-->
+</section>
+</body>
+</html>
