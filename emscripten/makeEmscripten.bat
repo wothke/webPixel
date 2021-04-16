@@ -7,7 +7,7 @@ SET ERRORLEVEL
 VERIFY > NUL
 
 :: **** use the "-s WASM" switch to compile WebAssembly output. warning: the SINGLE_FILE approach does NOT currently work in Chrome 63.. ****  
-set "OPT= -s WASM=0  -s DEMANGLE_SUPPORT=0 -s SAFE_HEAP=0 -s VERBOSE=0 -s ASSERTIONS=0 -s FORCE_FILESYSTEM=1 -s TOTAL_MEMORY=33554432 -Wno-pointer-sign -Dstricmp=strcasecmp -I. -I../src/ -I../src/vorbis/ -I../src/pxtone/ -I../src/organya/  -Os -O3 "
+set "OPT= -s WASM=0  -s DEMANGLE_SUPPORT=0 -s SAFE_HEAP=0 -s VERBOSE=0 -s ASSERTIONS=0 -s FORCE_FILESYSTEM=1 -s TOTAL_MEMORY=67108864 -Wno-pointer-sign -Dstricmp=strcasecmp -I. -I../src/ -I../src/vorbis/ -I../src/pxtone/ -I../src/organya/  -Os -O3 "
 
 if not exist "built/vorbis.bc" (
 	call emcc.bat %OPT% ../src/vorbis/mdct.c ../src/vorbis/smallft.c ../src/vorbis/block.c ../src/vorbis/envelope.c ../src/vorbis/window.c ../src/vorbis/lsp.c ../src/vorbis/lpc.c ../src/vorbis/analysis.c ../src/vorbis/synthesis.c ../src/vorbis/psy.c ../src/vorbis/info.c ../src/vorbis/floor1.c ../src/vorbis/floor0.c ../src/vorbis/res0.c ../src/vorbis/mapping0.c ../src/vorbis/registry.c ../src/vorbis/codebook.c ../src/vorbis/sharedbook.c ../src/vorbis/lookup.c ../src/vorbis/bitrate.c -o built/vorbis.bc

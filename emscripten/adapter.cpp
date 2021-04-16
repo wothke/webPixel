@@ -209,7 +209,7 @@ extern "C" int EMSCRIPTEN_KEEPALIVE emu_get_current_position() {
 	if (organya_mode) {
 		return isReady ? org_currentpos() : -1;			
 	} else {
-		return isReady ? playTime / sampleRate *1000 : -1;	
+		return isReady ? playTime / sampleRate*1000 : -1;	// time in msecs	
 	}
 }
 
@@ -223,7 +223,7 @@ extern "C" int EMSCRIPTEN_KEEPALIVE emu_get_max_position() {
 	if (organya_mode) {
 		return isReady ? org_getoutputtime() : -1;			
 	} else {
-		return isReady ? totalTime : -1;
+		return isReady ? totalTime/sampleRate*1000 : -1;	// time in msecs
 	}
 }
 
